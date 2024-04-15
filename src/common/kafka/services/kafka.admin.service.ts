@@ -4,7 +4,6 @@ import { Logger } from '@nestjs/common/services/logger.service';
 import { ConfigService } from '@nestjs/config';
 import { IKafkaAdminService } from 'src/common/kafka/interfaces/kafka.admin-service.interface';
 import { IKafkaCreateTopic } from 'src/common/kafka/interfaces/kafka.interface';
-import { KafkaCreateTopis } from 'src/common/kafka/constants/kafka.constant';
 
 @Injectable()
 export class KafkaAdminService
@@ -16,7 +15,6 @@ export class KafkaAdminService
   private readonly brokers: string[];
   private readonly clientId: string;
   private readonly kafkaOptions: KafkaConfig;
-  private readonly defaultPartition: number;
 
   protected logger = new Logger(KafkaAdminService.name);
 
@@ -24,16 +22,12 @@ export class KafkaAdminService
     this.clientId = this.configService.get<string>('kafka.admin.clientId');
     this.brokers = this.configService.get<string[]>('kafka.brokers');
 
-    this.topics = KafkaCreateTopis;
+    this.topics = this.configService.get('kafka.topics');
 
     this.kafkaOptions = {
       clientId: this.clientId,
       brokers: this.brokers,
     };
-
-    this.defaultPartition = this.configService.get<number>(
-      'kafka.admin.defaultPartition',
-    );
 
     this.logger.log(`Brokers ${this.brokers}`);
     this.kafka = new Kafka(this.kafkaOptions);
@@ -78,7 +72,7 @@ export class KafkaAdminService
     const data: ITopicConfig[] = [];
 
     for (const topic of this.topics) {
-      const partition: number = topic.partition ?? this.defaultPartition;
+      const partition: number = topic.partition;
       const replicationFactor: number =
         topic.replicationFactor &&
         topic.replicationFactor <= this.brokers.length

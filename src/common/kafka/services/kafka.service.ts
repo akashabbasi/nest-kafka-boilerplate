@@ -15,7 +15,6 @@ import {
   IKafkaProducerSendMessageOptions,
 } from 'src/common/kafka/interfaces/kafka.interface';
 import { IKafkaService } from 'src/common/kafka/interfaces/kafka.service.interface';
-import { ENUM_KAFKA_TOPICS } from 'src/common/kafka/constants/kafka.topic.constant';
 import { KAFKA_SERVICE_NAME } from 'src/common/kafka/constants/kafka.constant';
 
 // note:
@@ -35,14 +34,10 @@ export class KafkaService implements IKafkaService, OnApplicationBootstrap {
     private readonly configService: ConfigService,
     private readonly helperDateService: HelperDateService,
   ) {
-    this.timeout = this.configService.get<number>('kafka.producerSend.timeout');
+    this.timeout = this.configService.get<number>('kafka.producer.sendTimeout');
   }
 
   async onApplicationBootstrap(): Promise<void> {
-    Object.values(ENUM_KAFKA_TOPICS).forEach((topic) =>
-      this.clientKafka.subscribeToResponseOf(topic),
-    );
-
     await this.clientKafka.connect();
 
     this.logger.log('Kafka Client Connected');
@@ -143,5 +138,9 @@ export class KafkaService implements IKafkaService, OnApplicationBootstrap {
     return this.clientKafka.commitOffsets([
       { topic: kafkaTopic, partition: kafkaPartition, offset },
     ]);
+  }
+
+  async sendToDLQ<T>(topic: string, message: IKafkaMessage<T>): Promise<Observable<any>> {
+    return this.clientKafka.send(topic, JSON.stringify(message));
   }
 }

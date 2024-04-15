@@ -1,10 +1,11 @@
 import { HttpStatus } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
+import { CONTENT_TYPE_HEADER_NAME } from 'src/common/kafka/constants/kafka.constant'
 
 export type IKafkaResponse = Record<string, any>;
 
 export interface IKafkaMessageHeader {
-  user?: string;
+  [key: string]: string;
 }
 
 export interface IKafkaProducerMessageOptions {
@@ -14,6 +15,12 @@ export interface IKafkaProducerMessageOptions {
 export interface IKafkaProducerSendMessageOptions
   extends IKafkaProducerMessageOptions {
   raw?: boolean;
+}
+
+export interface IKafkaBaseMessage {
+  messageID: string;
+  createdAt: Date;
+  eventType: string;
 }
 
 export interface IKafkaMessage<T = Record<string, string>> {
@@ -34,4 +41,10 @@ export interface IKafkaCreateTopic {
   topicReply: string;
   partition?: number;
   replicationFactor?: number;
+}
+
+export interface IKafkaTopic {
+  topic: string;
+  parititon: number;
+  replicationFactor: number;
 }

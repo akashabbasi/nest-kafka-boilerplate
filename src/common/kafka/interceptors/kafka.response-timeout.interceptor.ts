@@ -36,6 +36,5 @@ export class KafkaResponseTimeoutInterceptor
         return throwError(() => err);
       }),
     );
-    return next.handle();
   }
 }

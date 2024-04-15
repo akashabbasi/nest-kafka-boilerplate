@@ -14,8 +14,8 @@ import { KafkaService } from './services/kafka.service';
     ClientsModule.registerAsync([
       {
         name: KAFKA_SERVICE_NAME,
-        inject: [ConfigService],
         imports: [ConfigModule],
+        inject: [ConfigService],
         useFactory: async (configService: ConfigService) => ({
           transport: Transport.KAFKA,
           options: {
