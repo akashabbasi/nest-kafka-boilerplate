@@ -3,7 +3,7 @@ import { Admin, ITopicConfig, Kafka, KafkaConfig } from 'kafkajs';
 import { Logger } from '@nestjs/common/services/logger.service';
 import { ConfigService } from '@nestjs/config';
 import { IKafkaAdminService } from 'src/common/kafka/interfaces/kafka.admin-service.interface';
-import { IKafkaCreateTopic } from 'src/common/kafka/interfaces/kafka.interface';
+import { IKafkaTopic } from 'src/common/kafka/interfaces/kafka.interface';
 
 @Injectable()
 export class KafkaAdminService
@@ -11,7 +11,7 @@ export class KafkaAdminService
 {
   private readonly kafka: Kafka;
   private readonly admin: Admin;
-  private readonly topics: IKafkaCreateTopic[];
+  private readonly topics: IKafkaTopic[];
   private readonly brokers: string[];
   private readonly clientId: string;
   private readonly kafkaOptions: KafkaConfig;
@@ -19,7 +19,7 @@ export class KafkaAdminService
   protected logger = new Logger(KafkaAdminService.name);
 
   constructor(private readonly configService: ConfigService) {
-    this.clientId = this.configService.get<string>('kafka.admin.clientId');
+    this.clientId = this.configService.get<string>('kafka.admin.clientID');
     this.brokers = this.configService.get<string[]>('kafka.brokers');
 
     this.topics = this.configService.get('kafka.topics');
@@ -72,25 +72,17 @@ export class KafkaAdminService
     const data: ITopicConfig[] = [];
 
     for (const topic of this.topics) {
-      const partition: number = topic.partition;
+      const partition: number = topic.partitions;
       const replicationFactor: number =
         topic.replicationFactor &&
         topic.replicationFactor <= this.brokers.length
           ? topic.replicationFactor
           : this.brokers.length;
-      if (!currentTopic.includes(topic.topic)) {
+      if (!currentTopic.includes(topic.name)) {
         data.push({
-          topic: topic.topic,
+          topic: topic.name,
           numPartitions: partition,
           replicationFactor: replicationFactor,
-        });
-      }
-
-      if (!currentTopic.includes(topic.topicReply)) {
-        data.push({
-          topic: topic.topicReply,
-          numPartitions: partition,
-          replicationFactor,
         });
       }
     }
@@ -112,12 +104,8 @@ export class KafkaAdminService
     const data = [];
 
     for (const topic of this.topics) {
-      if (currentTopic.includes(topic.topic)) {
-        data.push(topic.topic);
-      }
-
-      if (currentTopic.includes(topic.topicReply)) {
-        data.push(topic.topicReply);
+      if (currentTopic.includes(topic.name)) {
+        data.push(topic.name);
       }
     }
 

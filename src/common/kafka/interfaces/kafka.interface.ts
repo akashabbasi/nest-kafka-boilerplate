@@ -44,7 +44,7 @@ export interface IKafkaCreateTopic {
 }
 
 export interface IKafkaTopic {
-  topic: string;
-  parititon: number;
+  name: string;
+  partitions: number;
   replicationFactor: number;
 }

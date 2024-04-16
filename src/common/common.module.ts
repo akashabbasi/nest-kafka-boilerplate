@@ -1,19 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import configs from 'src/config/configuration';
+import { KafkaAdminModule } from './kafka/kafka.admin.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      load: [configs],
-      isGlobal: true,
-      cache: true,
-      expandVariables: true,
-      validationOptions: {
-        allowUnknown: true,
-        abortEarly: true,
-      },
-    }),
+    KafkaAdminModule
   ],
   controllers: [],
   providers: [],

@@ -1,7 +1,11 @@
 export type KafkaConfig = {
   clientID: string;
-  adminClientID: string;
-  brokers: string;
-  consumerEnable: boolean;
-  consumerGroup: string;
+  admin: {
+    clientID: string;
+  };
+  brokers: string[]
+  consumer: {
+    enable: boolean
+    group: string
+  }
 };

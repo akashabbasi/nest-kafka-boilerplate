@@ -1,5 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Inject, Module, OnModuleInit } from '@nestjs/common';
 import { KafkaAdminService } from 'src/common/kafka/services/kafka.admin.service';
+import { Logger } from 'winston';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   providers: [KafkaAdminService],
@@ -7,4 +10,21 @@ import { KafkaAdminService } from 'src/common/kafka/services/kafka.admin.service
   controllers: [],
   imports: [],
 })
-export class KafkaAdminModule {}
+export class KafkaAdminModule implements OnModuleInit {
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
+    private readonly adminService: KafkaAdminService,
+    private readonly configService: ConfigService
+  ) {}
+  async onModuleInit() {
+    try {
+      if (!this.configService.get<boolean>('kafka.allowAutoTopicCreation')) {
+        await this.adminService.createTopics();
+      }
+    } catch (err: unknown) {
+      this.logger.error("Error initializing kafka topics: ", err)
+      process.exit(-1)
+    }
+  }
+}

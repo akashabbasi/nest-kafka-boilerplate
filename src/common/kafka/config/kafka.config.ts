@@ -26,9 +26,15 @@ export default registerAs<KafkaConfig>('kafka', (): KafkaConfig => {
 
   return {
     clientID: process.env.KAFKA_CLIENT_ID,
-    adminClientID: process.env.KAFKA_ADMIN_CLIENT_ID,
-    brokers: process.env.KAFKA_BROKERS,
-    consumerEnable: process.env.KAFKA_CONSUMER_ENABLE === 'true',
-    consumerGroup: process.env.KAFKA_CONSUMER_GROUP,
+    admin: {
+      clientID: process.env.KAFKA_ADMIN_CLIENT_ID,
+    },
+    brokers: process.env.KAFKA_BROKERS.includes(',') ? 
+      process.env.KAFKA_BROKERS.split(',').map(item => item.trim()) 
+      : [process.env.KAFKA_BROKERS.trim()],
+    consumer: {
+      enable: process.env.KAFKA_CONSUMER_ENABLE === 'true',
+      group: process.env.KAFKA_CONSUMER_GROUP,
+    },
   };
 });
